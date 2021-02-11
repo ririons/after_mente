@@ -23,8 +23,8 @@ if(!empty($_SESSION['login_date'])){
     // 現在実行中のスクリプトファイル名がlogin.phpの場合
     // basename関数を使い、ファイル名を取る
     if(basename($_SERVER['PHP_SELF']) === 'login.php'){
-      debug('マイページへ遷移します。');
-      header("Location:index.php"); //マイページ
+      debug('トップページへ遷移します。');
+      header("Location:index.php"); //トップページ
     }
   }
 }else{

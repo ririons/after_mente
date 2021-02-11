@@ -217,13 +217,15 @@ function getErrMsg($key){
 //===========================
 // DB接続
 function dbConnect(){
+  $db = parse_url($_SERVER['CLEARDB_DATABASE_URL']);
+  $db['dbname'] = ltrim($db['path'],'/');
   // DB接続準備
-  $dsn = 'mysql:dbname=after_mente;host=localhost;charset=utf8';
-  $user = 'root';
-  $password = 'root';
+  $dsn = "mysql:host={$db['host']};dbname={$db['dbname']};charset=utf8";
+  $user = $db['user'];
+  $password = $db['pass'];
   $option = array(
     // 失敗時はエラーコードのみに限定
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     // デフォルトフェッチモードを連想配列形式で掲載
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     // バッファードクエリを使う(一度に結果セットをすべて取得し、サーバー負荷を軽減)
@@ -275,7 +277,7 @@ function getUser($u_id) {
   }
 }
 function getProduct($u_id, $p_id){
-  debug('アフター情報を取得します');
+  debug('情報を取得します');
   debug('ユーザーID:'.$u_id);
   debug('アフターID:'.$p_id);
   // 例外処理
@@ -283,14 +285,14 @@ function getProduct($u_id, $p_id){
     // DBへ接続
     $dbh = dbConnect();
     // SQL文作成
-    $sql = 'SELECT * FROM afterlist WHERE user_id = :u_id AND id = :p_id AND delete_flg = 0';
+    $sql = 'SELECT * FROM after_list WHERE id = :p_id AND user_id = :u_id AND delete_flg = 0';
     $data = array(':u_id' => $u_id, ':p_id' => $p_id);
     // クエリ実行
     $stmt = queryPost($dbh, $sql, $data);
 
     if($stmt){
       // クエリ結果のデータを1レコード返却
-      return $stmt->fetch(PDO::FETCH_ASSOC);
+      $stmt->fetch(PDO::FETCH_ASSOC);
     }else{
       return false;
     }
@@ -299,55 +301,23 @@ function getProduct($u_id, $p_id){
     error_log('エラー発生:'.$e->getMessage());
   }
 }
-function getProductList($currentMinNum = 1, $category,$sort, $span =20){
+function getProductList($currentMinNum = 1, $span =20){
   debug('アフター情報を取得します');
   // 例外処理
   try {
     // DBへ接続
     $dbh = dbConnect();
-    // 件数用のSQL文作成
-    $sql = 'SELECT id FROM after_list';
-    // if(!empty($category)) $sql .= 'WHERE category_id ='.$category;
-    // if(!empty($sort)){
-    //   switch($sort){
-    //     case 1:
-    //       $sql .= ' ORDER BY price ASC';
-    //       break;
-    //     case 2: 
-    //       $sql .= 'ORDER BY price DESC';
-    //       break;
-    //   }
-    // }
+    //SQL
+    $sql = 'SELECT * FROM after_list';
     $data = array();
     // クエリ実行
     $stmt = queryPost($dbh, $sql, $data);
     $rst['total'] = $stmt->rowCount();// 総レコード数
-    $rst['total_page'] = ceil($rst['total']/$span);//総ページ数
-    if(!$stmt){
-      return false;
-    }
-
-    // ページング用のSQL文作成
-    $sql = 'SELECT * FROM after_list';
-    // if(!empty($category)) $sql .= 'WHERE category_id = '.$category;
-    // if(!empty($sort)){
-    //   switch($sort){
-    //     case 1:
-    //       $sql .= 'ORDER BY price ASC';
-    //       break;
-    //     case 2: 
-    //       $sql .= 'ORDER BY price DESC';
-    //       break;
-    //   }
-    // }
-    $sql .= 'LIMIT'.$span.' OFFSET' .$currentMinNum;
-    $data = array();
-    debug('SQL:'.$sql);
-    // クエリ実行
-    $stmt = queryPost($dbh, $sql, $data);
-
-    if($stmt){
-      // クエリ結果のデータを全レコードを格納
+    // var_dump($rst['total'],true);
+    $rst['total_page'] = ceil($rst['total']/$span); //総ページ数
+    //総ページ数
+    if($stmt) {
+       // 全レコード配列形式で出力
       $rst['data'] = $stmt->fetchAll();
       return $rst;
     }else{
@@ -359,14 +329,14 @@ function getProductList($currentMinNum = 1, $category,$sort, $span =20){
 }
 
 function getProductOne($p_id){
-  debug('アフター情報を取得します。');
+  debug('アフター情報を取得します');
   debug('アフターID:'.$p_id);
   // 例外処理
   try{
     // DBへ接続
     $dbh = dbConnect();
     // SQL文作成
-    $sql = 'SELECT p.id,p.name,p.user_id,p.custer,p.reception_date,p.processing,p.trader,p.content,p.processing_content FROM after_list WHERE p.id = 1 AND p.delete_flg = 0';
+    $sql = 'SELECT p.id, p.name,p.reception_date, p.processing, p.content, p.processing_content, p.pic1, p.pic2, p.pic3 FROM after_list AS p LEFT JOIN users  ON p.user_id = users.id  WHERE p.id = 1 AND p.delete_flg = 0 AND users.delete_flg = 0';
     $data = array(':p_id' => $p_id);
     // クエリ実行
     $stmt =   queryPost($dbh, $sql, $data);

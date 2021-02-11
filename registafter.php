@@ -76,7 +76,7 @@ if(!empty($_POST)){
       // SQL文作成
       // 編集画面の場合UPDATE文、新規登録画面の場合はINSERT文を生成
         debug('DB新規登録です。');
-        $sql = 'INSERT INTO after_list (name,content,reception_date,processing,processing_content,pic1,pic2,pic3,user_id ) VALUES (:name, :content,:reception_date,:processing,:processing_content,:pic1,:pic2,:pic3,:u_id)';
+        $sql = 'INSERT INTO after_list (name,content,reception_date,processing,processing_content,pic1,pic2,pic3,user_id ) VALUE (:name, :content,:reception_date,:processing,:processing_content,:pic1,:pic2,:pic3,:u_id)';
         $data = array(':name' => $name,':content' => $content,':reception_date' => $reception_date,':processing_content' => $processing_content,':processing' => $processing, ':pic1' => $pic1, ':pic2' => $pic2,':pic3'=> $pic3,':u_id'=>$_SESSION['user_id']);
       debug('SQL'.$sql);
       debug('流し込みデータ:'.print_r($data,true));
@@ -217,7 +217,6 @@ require('head.php');
         </form>
       </div>
     </section>
-
     <!--      footer      -->
     <?php 
       require('footer.php');

@@ -22,11 +22,6 @@ require('auth.php');
 // カレントページ
 $currentPageNum = (!empty($_GET['p'])) ? $_GET['p'] : 1;
 // デフォルトは1ページ目
-// カテゴリー
-$category = (!empty($_GET['c_id'])) ? $_GET['c_id'] : '';
-// ソート順
-$sort = (!empty($_GET['sort'])) ? $_GET['sort'] : '';
-// パラメータに不正な値が入っているかチェック
 if(!is_int((int)$currentPageNum)){
   error_log('エラー発生:指定ページに不正な値が入りました');
   header("Location:index.php");
@@ -36,12 +31,10 @@ if(!is_int((int)$currentPageNum)){
 $listSpan = 20;
 // 現在の表示レコード先頭を算出
 $currentMinNum = (($currentPageNum-1)*$listSpan);
-// DBからアフターデータを取得
-getProductOne($p_id);
-$dbProductData = getProductList($currentMinNum,$category,$sort);
+$dbProductData = getProductList($currentMinNum);
+
+
 // DBからカテゴリーデータを取得
-// $dbCategoryData = getCategory();
-// debug('カテゴリデータ'.print_r($dbCategoryData,true));
 
 debug('画面表示処理終了<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 ?>
@@ -61,18 +54,6 @@ require('head.php');
   <div id="contents" class="site-width">
 
     <!-- サイドバー -->
-    <section id="sidebar">
-      <form action="" name="" method="get">
-        <h1 class="title">カテゴリー</h1>
-        <div class="selectbox">
-          <span class="icn_select"></span>
-          <select name="c_id" id="">
-            <option value="0" <?php if(getFormData('c_id',true) == 0){echo 'selected';}?>>選択してください
-          </select>
-        </div>
-      </form>
-    </section>
-
     <!-- Main -->
     <section id="main">
       <div class="panel-list">
@@ -82,10 +63,10 @@ require('head.php');
         ?>
         <a href="Detail.php<?php echo (!empty (appendGetParam())) ? appendGetParam().'&p_id='.$val['id']: '?p_id='.$val['id']; ?>" class="panel">
             <div class="panel-head">
-              <img src="<?php echo sanitize($val['pic']); ?>" alt="<?php echo sanitize($val['name']); ?>">
+              <img src="<?php echo sanitize($val['pic1']);?>" alt="<?php echo sanitize($val['name']); ?>">
             </div>
             <div class="panel-body">
-              <p class="panel-title"><?php echo sanitize($val['name']); ?><span class="price">¥<?php echo sanitize(number_format($val['price'])); ?></span></p>
+              <p class="panel-title"><?php echo sanitize($val['name']); ?><span class="reception_date">¥<?php echo sanitize($val['reception_date']); ?></span></p>
             </div>
         </a>
         <?php 
